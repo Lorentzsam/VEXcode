@@ -1,30 +1,21 @@
+//before everything else, define the bot type
+
+#define BotA
+//#define BotB
+
+
+
+
 //define keys
 //constant
-#define MAIN_LOOP_CYCLE_TIME 50
-#define LEFT_MOTOR_PORTS {1, -2, 3}
-#define RIGHT_MOTOR_PORTS {-4, 5, -6}
+#define MAIN_LOOP_CYCLE_TIME 20
 
 
 
 
 #include "main.h"
 #include "brc.hpp"
-
-/**
- * A callback function for LLEMU's center button.
- *
- * When this callback is fired, it will toggle line 2 of the LCD text between
- * "I was pressed!" and nothing.
- */
-void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
-}
+#include "profile.hpp"
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -32,11 +23,15 @@ void on_center_button() {
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
+
+pros::Controller master(pros::E_CONTROLLER_MASTER);
+pros::MotorGroup Left_Drivetrain = LEFT_MOTOR_PORTS;
+pros::MotorGroup Right_Drivetrain = RIGHT_MOTOR_PORTS;
+Robot Geneva_Convention_Bot(Left_Drivetrain, Right_Drivetrain, master, Tank);
+
 void initialize() {
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
 }
 
 /**
@@ -85,20 +80,10 @@ void autonomous() {}
  */
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::MotorGroup left_mg(LEFT_MOTOR_PORTS);    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
-	pros::MotorGroup right_mg(RIGHT_MOTOR_PORTS);  // Creates a motor group with forwards port 5 and reversed ports 4 & 6
 
-
+	int main_loop_cycle_times = 0;
 	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);  // Prints status of the emulated screen LCDs
-
-		// Arcade control scheme
-		int dir = master.get_analog(ANALOG_LEFT_Y);    // Gets amount forward/backward from left joystick
-		int turn = master.get_analog(ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
-		left_mg.move(dir - turn);                      // Sets left motor voltage
-		right_mg.move(dir + turn);                     // Sets right motor voltage
+		Geneva_Convention_Bot.update_Driver_ctrl();
 		pros::delay(MAIN_LOOP_CYCLE_TIME);               // Run for the defined cycle time then update
 	}
 }
