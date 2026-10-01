@@ -8,7 +8,7 @@
 
 //define keys
 //constant
-#define MAIN_LOOP_CYCLE_TIME 50
+#define MAIN_LOOP_CYCLE_TIME 20
 
 
 
@@ -18,35 +18,20 @@
 #include "profile.hpp"
 
 /**
- * A callback function for LLEMU's center button.
- *
- * When this callback is fired, it will toggle line 2 of the LCD text between
- * "I was pressed!" and nothing.
- */
-void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
-}
-
-/**
  * Runs initialization code. This occurs as soon as the program is started.
  *
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
 
-Robot Geneva_Convention_Bot;
+
+pros::Controller master(pros::E_CONTROLLER_MASTER);
+pros::MotorGroup Left_Drivetrain = LEFT_MOTOR_PORTS;
+pros::MotorGroup Right_Drivetrain = RIGHT_MOTOR_PORTS;
+Robot Geneva_Convention_Bot(Left_Drivetrain, Right_Drivetrain, master, Tank);
 
 void initialize() {
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-	pros::lcd::register_btn1_cb(on_center_button);
-	Geneva_Convention_Bot.initialize(LEFT_MOTOR_PORTS, RIGHT_MOTOR_PORTS, 7, pros::Controller(pros::E_CONTROLLER_MASTER), Tank);
 }
 
 /**
@@ -98,7 +83,7 @@ void opcontrol() {
 
 	int main_loop_cycle_times = 0;
 	while (true) {
-
+		Geneva_Convention_Bot.update_Driver_ctrl();
 		pros::delay(MAIN_LOOP_CYCLE_TIME);               // Run for the defined cycle time then update
 	}
 }
